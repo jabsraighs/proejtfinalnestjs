@@ -1,0 +1,42 @@
+services:
+  node:
+    image: node:latest
+    tty: true
+    stdin_open: true
+    working_dir: /home/node
+    entrypoint: sh -c
+    command: '"npm install && npm run start:dev "'
+    depends_on:
+      - database
+    env_file:
+      - .env.local
+    expose:
+      - 5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./:/home/node                    # Le dossier server
+
+  postgres:
+    image: postgres:16-alpine
+    env_file:
+      - .env.local
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  database:
+    image: adminer
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+
+volumes:
+  db_data:
